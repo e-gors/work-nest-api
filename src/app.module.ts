@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
-import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
 import { UsersModule } from './users/users.module.js';
+import { ConfigService } from './common/config/config.service.js';
+import { ConfigModule } from './common/config/config.module.js';
+import { DatabaseModule } from './common/database/database.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -16,8 +17,10 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       serviceId: 'work-nest-api',
     }),
     UsersModule,
+    ConfigModule,
+    DatabaseModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [ConfigService],
 })
 export class AppModule {}
