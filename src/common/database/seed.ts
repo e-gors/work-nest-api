@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { AppDataSource } from './data-source.js';
 import { seedRoles } from './seeds/roles.seed.js';
+import { seedSuperAdmin } from './seeds/admin.seed.js';
 
 async function runSeeds() {
   await AppDataSource.initialize();
@@ -8,6 +9,7 @@ async function runSeeds() {
 
   // Add here calls to your seed functions for other entities as needed
   await seedRoles(AppDataSource);
+  await seedSuperAdmin(AppDataSource);
 
   await AppDataSource.destroy();
   console.log('Database seeding complete');
