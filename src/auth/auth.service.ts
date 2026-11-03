@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UserSessionsService } from '../user_sessions/user_sessions.service.js';
 import { UserSession } from '../user_sessions/entities/user_session.entity.js';
+import type { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -48,10 +49,10 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email, role: user.role };
 
     // Generate Access Token
-    const accessToken = this.generateAccessToken(payload);
+    const accessToken = await this.generateAccessToken(payload);
 
     // Generate Refresh Token
-    const refreshToken = this.generateRefreshToken(payload);
+    const refreshToken = await this.generateRefreshToken(payload);
 
     const hashedRefreshToken =
       await this.userSessionService.hashToken(refreshToken);
@@ -76,7 +77,7 @@ export class AuthService {
   }
 
   private checkUserStatus(user: User) {
-    if (user.status === 'pending' && !user.email_verified) {
+    if (user.status === 'pending' && !user.emailVerifiedAt) {
       throw new ForbiddenException(
         'Please verify your email address before logging in.',
       );
@@ -94,26 +95,26 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('User not found');
 
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const accessToken = this.generateAccessToken(payload);
+    const accessToken = await this.generateAccessToken(payload);
 
     return { accessToken };
   }
 
-  private generateAccessToken(payload: any): string {
+  private async generateAccessToken(payload: any): Promise<string> {
     return this.jwtService.sign(payload, {
       secret: this.configService.jwtSecret,
       expiresIn: this.configService.jwtExpiresIn,
     });
   }
 
-  private generateRefreshToken(payload: any): string {
+  private async generateRefreshToken(payload: any): Promise<string> {
     return this.jwtService.sign(payload, {
       secret: this.configService.jwtRefreshSecret,
       expiresIn: this.configService.refreshTokenExpiresIn,
     });
   }
 
-  private setRefreshTokenCookie(res: Response, refreshToken: string) {
+  private async setRefreshTokenCookie(res: Response, refreshToken: string) {
     res.cookie('refresh_token', refreshToken, {
       httpOnly: this.configService.isProduction,
       secure: this.configService.isProduction,
