@@ -8,6 +8,7 @@ import {
 import type { Relation } from 'typeorm';
 import { IsEmail } from 'class-validator';
 import { User } from '../../users/entities/user.entity.js';
+import { WorkerProfile } from '../../worker_profiles/entities/worker_profile.entity.js';
 
 @Entity('profiles')
 export class Profile {
@@ -67,4 +68,7 @@ export class Profile {
   })
   @JoinColumn({ name: 'user_id' })
   user: Relation<User>;
+
+  @OneToOne(() => WorkerProfile, (workerProfile) => workerProfile.profile)
+  workerProfile: Relation<WorkerProfile>;
 }
