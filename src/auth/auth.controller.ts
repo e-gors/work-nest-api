@@ -1,11 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, Ip, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  HttpCode,
+  Ip,
+  Res,
+  Headers,
+} from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { User } from '../users/entities/user.entity.js';
 import { LocalAuthGuard } from './guards/local-auth.guard.js';
-import { AppTypeAndRoleGuard } from './guards/app-type.guard.js';
 import { UserRoles } from '../common/constants.js';
 import { Profile } from '../profiles/entities/profile.entity.js';
 import { CurrentUser } from './guards/current-user.decorator.js';
+import type { Response } from 'express';
 
 interface AuthenticatedUser {
   id: string;
@@ -24,7 +32,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // LOGIN
-  @UseGuards(LocalAuthGuard, AppTypeAndRoleGuard)
+  @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(200)
   async login(
@@ -34,6 +42,5 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     return await this.authService.login(user, res, userAgent, ipAddress);
-  }
   }
 }
