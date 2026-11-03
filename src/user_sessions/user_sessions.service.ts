@@ -21,11 +21,11 @@ export class UserSessionsService {
     ipAddress?: string,
   ): Promise<UserSession> {
     const sessionEntity = this.sessionRepo.create({
-      user_id: userId,
-      refresh_token: refreshToken,
-      user_agent: userAgent ?? null,
-      ip_address: ipAddress ?? null,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      userId,
+      refreshToken,
+      userAgent: userAgent ?? null,
+      ipAddress: ipAddress ?? null,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     } as Partial<UserSession>);
 
     return this.sessionRepo.save(sessionEntity);
@@ -37,14 +37,14 @@ export class UserSessionsService {
     refreshToken: string,
   ): Promise<UserSession | null> {
     const sessions = await this.sessionRepo.find({
-      where: { user_id: userId, revoked_at: IsNull() },
+      where: { userId: userId, revokedAt: IsNull() },
     });
 
     for (const session of sessions) {
       // Check expiration
-      if (session.expires_at < new Date()) continue;
+      if (session.expiresAt < new Date()) continue;
 
-      const match = await bcrypt.compare(refreshToken, session.refresh_token);
+      const match = await bcrypt.compare(refreshToken, session.refreshToken);
       if (match) return session;
     }
 
@@ -53,20 +53,20 @@ export class UserSessionsService {
 
   // Revoke one session
   async revokeSession(sessionId: string): Promise<void> {
-    await this.sessionRepo.update(sessionId, { revoked_at: new Date() });
+    await this.sessionRepo.update(sessionId, { revokedAt: new Date() });
   }
 
   // Revoke all sessions for a user (logout all devices)
   async revokeAllUserSessions(userId: string): Promise<void> {
     await this.sessionRepo.update(
-      { user_id: userId },
-      { revoked_at: new Date() },
+      { userId: userId },
+      { revokedAt: new Date() },
     );
   }
 
   // Optional: delete expired sessions periodically
   async deleteExpiredSessions(): Promise<void> {
-    await this.sessionRepo.delete({ expires_at: LessThan(new Date()) });
+    await this.sessionRepo.delete({ expiresAt: LessThan(new Date()) });
   }
 
   async hashToken(token: string): Promise<string> {
@@ -82,9 +82,9 @@ export class UserSessionsService {
   async checkActiveSessions(userId: string): Promise<boolean> {
     const activeSessions = await this.sessionRepo.count({
       where: {
-        user_id: userId,
-        revoked_at: IsNull(),
-        expires_at: MoreThan(new Date()),
+        userId: userId,
+        revokedAt: IsNull(),
+        expiresAt: MoreThan(new Date()),
       },
     });
     return activeSessions > 0;

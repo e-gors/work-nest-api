@@ -9,6 +9,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { User } from '../../users/entities/user.entity.js';
 
 @Entity('user_sessions')
@@ -16,42 +17,48 @@ export class UserSession {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  user_id: string;
+  @Column({ type: 'uuid', name: 'user_id' })
+  userId: string;
 
-  @Column()
-  refresh_token: string;
+  @Column({ type: 'text', name: 'refresh_token' })
+  refreshToken: string;
 
   @BeforeInsert()
-  async hashrefresh_tokenBeforeInsert(): Promise<void> {
-    this.refresh_token = await bcrypt.hash(this.refresh_token, 10);
-  }
-
-  @BeforeUpdate()
-  async hashrefresh_tokenBeforeUpdate(): Promise<void> {
-    if (this.refresh_token && !this.isHashed(this.refresh_token)) {
-      this.refresh_token = await bcrypt.hash(this.refresh_token, 10);
+  async hashRefreshTokenBeforeInsert(): Promise<void> {
+    if (this.refreshToken && !this.isHashed(this.refreshToken)) {
+      this.refreshToken = await bcrypt.hash(this.refreshToken, 10);
     }
   }
 
-  @Column({ nullable: true })
-  user_agent: string;
+  @BeforeUpdate()
+  async hashRefreshTokenBeforeUpdate(): Promise<void> {
+    if (this.refreshToken && !this.isHashed(this.refreshToken)) {
+      this.refreshToken = await bcrypt.hash(this.refreshToken, 10);
+    }
+  }
 
-  @Column({ nullable: true })
-  ip_address: string;
+  @Column({ nullable: true, name: 'user_agent', type: 'text' })
+  userAgent: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @Column({ nullable: true, name: 'ip_address', type: 'text' })
+  ipAddress: string;
 
-  @Column()
-  expires_at: Date;
+  @CreateDateColumn({
+    type: 'timestamp',
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  createdAt: Date;
 
-  @Column({ nullable: true })
-  revoked_at: Date;
+  @Column({ type: 'timestamp', name: 'expires_at' })
+  expiresAt: Date;
+
+  @Column({ nullable: true, type: 'timestamp', name: 'revoked_at' })
+  revokedAt: Date;
 
   @ManyToOne(() => User, (user) => user.sessions)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: Relation<User>;
 
   private isHashed(password: string): boolean {
     // bcrypt hashes start with $2a$, $2b$, or $2y$
