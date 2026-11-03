@@ -1,10 +1,10 @@
-import * as fs from "fs";
-import * as path from "path";
+import fs from 'fs';
+import path from 'path';
 
 const args = process.argv.slice(2);
 
 if (!args[0]) {
-  console.error("Please provide a migration name.");
+  console.error('Please provide a migration name.');
   process.exit(1);
 }
 
@@ -14,7 +14,7 @@ const timestamp = Date.now();
 // Directory for migrations
 const migrationsDir = path.join(
   process.cwd(),
-  "src/common/database/migrations",
+  'src/common/database/migrations',
 );
 if (!fs.existsSync(migrationsDir)) {
   fs.mkdirSync(migrationsDir, { recursive: true });
@@ -28,7 +28,7 @@ const filePath = path.join(migrationsDir, fileName);
 const className = `${tableName}${timestamp}`;
 
 // Boilerplate content
-const template = `import { MigrationInterface, QueryRunner } from "typeorm";
+const template = `import type { MigrationInterface, QueryRunner } from "typeorm";
 
 export class ${className} implements MigrationInterface {
 
