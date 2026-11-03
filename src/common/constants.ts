@@ -15,3 +15,9 @@ export enum UserStatus {
   SUSPENDED = 'suspended',
   DELETED = 'deleted',
 }
+
+export enum WorkerAvailabilityStatus {
+  AVAILABLE = 'available',
+  UNAVAILABLE = 'unavailable',
+  BUSY = 'busy',
+}
