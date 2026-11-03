@@ -1,25 +1,27 @@
-import { Module, Global } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
-import { ConfigService } from "../config/config.service.js";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { Module, Global } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { ConfigModule } from '../config/config.module.js';
+import { ConfigService } from '@nestjs/config';
 
 @Global()
 @Module({
   imports: [
     ConfigModule,
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: "postgres",
-        host: configService.dbHost,
-        port: configService.dbPort,
-        username: configService.dbUser,
-        password: configService.dbPassword,
-        database: configService.dbName,
-        entities: [], // add all your entities
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USER'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_NAME'),
+        autoLoadEntities: true,
         synchronize: false,
-        migrations: ["src/common/database/migrations/*.js"],
+        migrations: ['src/common/database/migrations/*{.js,.ts}'],
       }),
     }),
   ],
