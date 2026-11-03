@@ -35,7 +35,7 @@ npm run seed
 1. Create migration without entities
 
 ```bash
-npm run migration:create -- src/common/database/migrations/TableName
+npm run migration:create -- TableName
 ```
 
 2. If you already have entities and want to generate a migration:
